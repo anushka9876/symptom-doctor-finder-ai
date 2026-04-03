@@ -1,18 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Login{% endblock %}
-
 {% block content %}
-<div class="auth-card">
+
+<div class="card">
   <h2>Login</h2>
 
-  <!-- action="" posts to the same URL, Django's LoginView handles it -->
-  <form method="post" action="">
+  <form method="post">
     {% csrf_token %}
-    <!-- Django renders the form fields automatically -->
-    {{ form.as_p }}
+    <input type="text" name="username" placeholder="Username">
+    <input type="password" name="password" placeholder="Password">
     <button type="submit">Login</button>
   </form>
-
-  <p>No account? <a href="{% url 'accounts:register' %}">Register here</a></p>
 </div>
+
 {% endblock %}

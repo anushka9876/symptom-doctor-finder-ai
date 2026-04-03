@@ -31,7 +31,7 @@ def live_search(request):
     # Return ONLY the suggestions partial — HTMX swaps this in
     return render(request,
         'partials/symptom_suggestions.html',
-        {'results': results})
+        {'symptoms': results})
 
 
 @login_required
