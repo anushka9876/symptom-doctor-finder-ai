@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Symptom Checker{% endblock %}</title>
+
+  <!-- Your CSS -->
+   <style id="t4a8f1">
+body {
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+    padding: 40px;
+}
+
+.symptom-page {
+    max-width: 600px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+#suggestions {
+    background: #fff;
+    border: 1px solid #ddd;
+    margin-top: 5px;
+    padding: 5px;
+}
+
+#spinner {
+    display: none;
+}
+.htmx-request #spinner {
+    display: inline;
+}
+</style>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  <!-- Leaflet.js — for doctor map -->
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Chart.js — for dashboard graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- HTMX — for live updates without page reload -->
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav>
+    <a href="{% url 'symptoms:home' %}">Symptom Checker</a>
+    {% if user.is_authenticated %}
+      <span>Hi, {{ user.username }}</span>
+      <a href="{% url 'accounts:logout' %}">Logout</a>
+    {% else %}
+      <a href="{% url 'accounts:login' %}">Login</a>
+      <a href="{% url 'accounts:register' %}">Register</a>
+    {% endif %}
+  </nav>
+
+  <!-- Flash messages (login success, errors etc.) -->
+  {% for message in messages %}
+    <div class="message {{ message.tags }}">{{ message }}</div>
+  {% endfor %}
+
+  <!-- Each page puts its content here -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

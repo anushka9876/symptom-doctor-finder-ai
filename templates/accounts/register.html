@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h2>Create account</h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        {{ field.label_tag }}
+        {{ field }}
+        <!-- Shows validation errors e.g. "Password too short" -->
+        {% if field.errors %}
+          <span class="error">{{ field.errors|join:", " }}</span>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit">Create account</button>
+  </form>
+
+  <p>Already registered? <a href="{% url 'accounts:login' %}">Login</a></p>
+</div>
+{% endblock %}

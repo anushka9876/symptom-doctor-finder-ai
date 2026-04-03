@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Check Symptoms{% endblock %}
+
+{% block content %}
+<div class="symptom-page">
+  <h2>Describe your symptoms</h2>
+
+  <!-- TEXT INPUT with HTMX live search -->
+  <div class="search-box">
+   <!-- HTMX: send GET to /symptoms/search/ -->
+<!-- HTMX: fire 400ms after user STOPS typing -->
+<!-- HTMX: put the response inside this div -->
+<!-- HTMX: show spinner while waiting -->
+
+<input
+  type="text"
+  name="q"
+  placeholder="Type a symptom e.g. fever, headache..."
+  hx-get="{% url 'symptoms:search' %}"
+  hx-trigger="keyup changed delay:400ms"
+  hx-target="#suggestions"
+  hx-indicator="#spinner"
+>
+    <!-- Spinner — hidden until HTMX fires a request -->
+    <span id="spinner" class="htmx-indicator">Searching...</span>
+
+    <!-- HTMX swaps results into this div -->
+    <div id="suggestions"></div>
+  </div>
+
+  <!-- MAIN FORM — submits all typed symptoms for AI check -->
+  <form
+    method="post"
+    action="{% url 'symptoms:check' %}"
+    hx-post="{% url 'symptoms:check' %}"
+    hx-target="#results"
+    hx-swap="innerHTML"
+  >
+    {% csrf_token %}
+    <textarea
+      name="symptoms_text"
+      rows="4"
+      placeholder="Describe all your symptoms here..."
+    ></textarea>
+    <button type="submit">Check Symptoms</button>
+  </form>
+
+  <!-- AI results appear here after form submit -->
+  <div id="results"></div>
+</div>
+{% endblock %}
