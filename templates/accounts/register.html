@@ -3,15 +3,46 @@
 
 <div class="card">
   <h2>Register</h2>
+  {% if form.errors %}
+  <div style="color:red;">
+    {{ form.errors }}
+  </div>
+{% endif %}
 
   <form method="post">
-    {% csrf_token %}
-    <input type="text" name="username" placeholder="Username">
-    <input type="email" name="email" placeholder="Email">
-    <input type="password" name="password1" placeholder="Password">
-    <input type="password" name="password2" placeholder="Confirm Password">
-    <button type="submit">Register</button>
-  </form>
+  {% csrf_token %}
+
+  <label>Username</label>
+  <input type="text" name="username" required>
+
+  <label>Email</label>
+  <input type="email" name="email" required>
+
+  <label>Password</label>
+  <input type="password" name="password1" required>
+
+  <label>Confirm Password</label>
+  <input type="password" name="password2" required>
+
+  <label>Age</label>
+  <input type="number" name="age">
+
+  <label>Gender</label>
+  <select name="gender">
+    <option value="">Select</option>
+    <option value="M">Male</option>
+    <option value="F">Female</option>
+    <option value="O">Other</option>
+  </select>
+
+  <label>City</label>
+  <input type="text" name="city">
+
+  <label>Phone</label>
+  <input type="text" name="phone">
+
+  <button type="submit">Register</button>
+</form>
 </div>
 
 {% endblock %}

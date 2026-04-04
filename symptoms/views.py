@@ -4,7 +4,6 @@ from django.http import HttpResponse
 from .models import Symptom, SymptomCheck
 
 # @login_required redirects to /accounts/login/ if not logged in
-@login_required
 def symptom_page(request):
     # Load all 132 symptoms for the checkbox list
     all_symptoms = Symptom.objects.all().order_by('name')

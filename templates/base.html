@@ -108,6 +108,62 @@
       background: #ecfeff;
       border-radius: 10px;
     }
+
+    /* NEW NAVBAR STYLES */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 18px;
+  text-decoration: none;
+  color: #0D9488;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-badge {
+  background: #ecfeff;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  color: #0D9488;
+}
+
+.logout-btn {
+  background: transparent;
+  border: 1px solid #0D9488;
+  color: #0D9488;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-top: 0; /* important fix */
+  width: auto;   /* prevent full width */
+}
+
+.logout-btn:hover {
+  background: #0D9488;
+  color: white;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #333;
+}
+
+.nav-link:hover {
+  color: #0D9488;
+}
   </style>
 
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -115,24 +171,23 @@
 
 <body>
 
-<nav>
-  <div>
-    <a href="{% url 'symptoms:home' %}">MediCheck 🩺</a>
+<nav class="navbar">
+  <div class="nav-left">
+    <a href="{% url 'symptoms:home' %}" class="logo">MediCheck 🩺</a>
   </div>
 
-  <div>
+  <div class="nav-right">
     {% if user.is_authenticated %}
-      <span>Hi, {{ user.username }}</span>
+      <span class="user-badge">👋 {{ user.username }}</span>
 
-      <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+      <form method="post" action="{% url 'accounts:logout' %}">
         {% csrf_token %}
-        <button style="background:none;border:none;color:#0D9488;cursor:pointer;">
-          Logout
-        </button>
+        <button class="logout-btn">Logout</button>
       </form>
+
     {% else %}
-      <a href="{% url 'accounts:login' %}">Login</a>
-      <a href="{% url 'accounts:register' %}">Register</a>
+      <a href="{% url 'accounts:login' %}" class="nav-link">Login</a>
+      <a href="{% url 'accounts:register' %}" class="nav-link">Register</a>
     {% endif %}
   </div>
 </nav>
