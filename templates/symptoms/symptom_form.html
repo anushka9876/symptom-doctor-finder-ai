@@ -25,6 +25,15 @@
     {% csrf_token %}
     <textarea name="symptoms_text" rows="4"
       placeholder="Describe your symptoms..."></textarea>
+    <h3>Selected Symptoms</h3>
+
+<p id="empty-text" style="color:#888; font-size:14px;">
+  No symptoms selected
+</p>
+
+<div id="selected-symptoms"></div>
+
+<input type="hidden" name="symptoms" id="symptoms-input">
 
     <button type="submit">Check Symptoms</button>
   </form>

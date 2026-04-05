@@ -8,8 +8,16 @@
     {% csrf_token %}
     <input type="text" name="username" placeholder="Username">
     <input type="password" name="password" placeholder="Password">
+    <input type="hidden" name="latitude" id="lat">
+    <input type="hidden" name="longitude" id="lng">
     <button type="submit">Login</button>
   </form>
 </div>
+<script>
+navigator.geolocation.getCurrentPosition(function(position) {
+    document.getElementById('lat').value = position.coords.latitude;
+    document.getElementById('lng').value = position.coords.longitude;
+});
+</script>
 
 {% endblock %}

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}MediCheck{% endblock %} </title>
+  <title>{% block title %}MediCheck{% endblock %}</title>
 
   <style>
     body {
@@ -12,22 +12,57 @@
     }
 
     /* NAVBAR */
-    nav {
+    .navbar {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 15px 30px;
       background: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
-    nav a {
+    .logo {
+      font-weight: bold;
+      font-size: 18px;
       text-decoration: none;
-      margin-right: 15px;
-      color: #333;
-      font-weight: 500;
+      color: #0D9488;
     }
 
-    nav a:hover {
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .user-badge {
+      background: #ecfeff;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      color: #0D9488;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid #0D9488;
+      color: #0D9488;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      width: auto;
+    }
+
+    .logout-btn:hover {
+      background: #0D9488;
+      color: white;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: #333;
+    }
+
+    .nav-link:hover {
       color: #0D9488;
     }
 
@@ -77,7 +112,7 @@
       background: #0f766e;
     }
 
-    /* SUGGESTIONS */
+    /* SEARCH DROPDOWN */
     .search-box {
       position: relative;
     }
@@ -85,6 +120,8 @@
     #suggestions {
       position: absolute;
       width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
       background: white;
       border: 1px solid #ddd;
       border-radius: 10px;
@@ -98,72 +135,32 @@
     }
 
     #suggestions div:hover {
-      background: #f0f0f0;
-    }
-
-    /* RESULT BOX */
-    #results {
-      margin-top: 15px;
-      padding: 10px;
       background: #ecfeff;
-      border-radius: 10px;
+      color: #0D9488;
     }
 
-    /* NEW NAVBAR STYLES */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 30px;
-  background: white;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-}
+    /* TAGS */
+    #selected-symptoms {
+      margin-top: 10px;
+    }
 
-.logo {
-  font-weight: bold;
-  font-size: 18px;
-  text-decoration: none;
-  color: #0D9488;
-}
+    .tag {
+      display: inline-block;
+      margin: 5px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: #ecfeff;
+      color: #0D9488;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
 
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
+    .tag:hover {
+      background: #0D9488;
+      color: white;
+    }
 
-.user-badge {
-  background: #ecfeff;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  color: #0D9488;
-}
-
-.logout-btn {
-  background: transparent;
-  border: 1px solid #0D9488;
-  color: #0D9488;
-  padding: 6px 12px;
-  border-radius: 20px;
-  cursor: pointer;
-  margin-top: 0; /* important fix */
-  width: auto;   /* prevent full width */
-}
-
-.logout-btn:hover {
-  background: #0D9488;
-  color: white;
-}
-
-.nav-link {
-  text-decoration: none;
-  color: #333;
-}
-
-.nav-link:hover {
-  color: #0D9488;
-}
   </style>
 
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -172,9 +169,7 @@
 <body>
 
 <nav class="navbar">
-  <div class="nav-left">
-    <a href="{% url 'symptoms:home' %}" class="logo">MediCheck 🩺</a>
-  </div>
+  <a href="{% url 'symptoms:home' %}" class="logo">MediCheck 🩺</a>
 
   <div class="nav-right">
     {% if user.is_authenticated %}
@@ -184,7 +179,6 @@
         {% csrf_token %}
         <button class="logout-btn">Logout</button>
       </form>
-
     {% else %}
       <a href="{% url 'accounts:login' %}" class="nav-link">Login</a>
       <a href="{% url 'accounts:register' %}" class="nav-link">Register</a>
@@ -195,6 +189,64 @@
 <div class="container">
   {% block content %}{% endblock %}
 </div>
+
+<script>
+let selectedSymptoms = [];
+
+function addSymptom(name) {
+    if (selectedSymptoms.includes(name)) return;
+
+    selectedSymptoms.push(name);
+    renderTags();
+    updateHiddenInput();
+    clearSuggestions();
+
+    // clear input
+    const input = document.querySelector("input");
+    if (input) input.value = "";
+}
+
+function removeSymptom(name) {
+    selectedSymptoms = selectedSymptoms.filter(s => s !== name);
+    renderTags();
+    updateHiddenInput();
+}
+
+function renderTags() {
+    const container = document.getElementById("selected-symptoms");
+    const emptyText = document.getElementById("empty-text");
+
+    if (!container) return;
+
+    container.innerHTML = "";
+
+    if (selectedSymptoms.length === 0) {
+        if (emptyText) emptyText.style.display = "block";
+    } else {
+        if (emptyText) emptyText.style.display = "none";
+
+        selectedSymptoms.forEach(symptom => {
+            const tag = document.createElement("span");
+            tag.className = "tag";
+            tag.innerHTML = `${symptom} ✖`;
+            tag.onclick = () => removeSymptom(symptom);
+            container.appendChild(tag);
+        });
+    }
+}
+
+function updateHiddenInput() {
+    const input = document.getElementById("symptoms-input");
+    if (input) {
+        input.value = JSON.stringify(selectedSymptoms);
+    }
+}
+
+function clearSuggestions() {
+    const el = document.getElementById("suggestions");
+    if (el) el.innerHTML = "";
+}
+</script>
 
 </body>
 </html>

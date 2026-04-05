@@ -38,6 +38,8 @@ def check_symptoms(request):
     # Week 3 will fill this in with AI logic
     # For now, just confirm it receives the POST
     if request.method == 'POST':
+        selected = request.POST.getlist('selected_symptoms')
         text = request.POST.get('symptoms_text', '')
-        return HttpResponse(f'Received: {text} — AI coming in Week 3')
+        all_inputs = text + " " + " ".join(selected)
+        return HttpResponse(f"You entered: {all_inputs}")
     return render(request, 'symptoms/symptom_form.html')

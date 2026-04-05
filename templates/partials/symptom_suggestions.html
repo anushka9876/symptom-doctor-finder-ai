@@ -1,10 +1,5 @@
 {% for symptom in symptoms %}
-  <div onclick="
-    document.querySelector('[name=q]').value='{{ symptom.name }}';
-    document.getElementById('suggestions').innerHTML='';
-  ">
+  <div onclick="addSymptom('{{ symptom.name }}')">
     {{ symptom.name }}
   </div>
-{% empty %}
-  <div>No results</div>
 {% endfor %}
