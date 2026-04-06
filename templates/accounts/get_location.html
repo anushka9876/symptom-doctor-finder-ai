@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Getting Location</title>
+</head>
+<body>
+
+<h3>Getting your location...</h3>
+
+<script>
+if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+
+        fetch("{% url 'accounts:save_location' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            })
+        })
+        .then(() => {
+            window.location.href = "{% url 'symptoms:home' %}";
+        });
+
+    });
+}
+</script>
+
+</body>
+</html>

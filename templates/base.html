@@ -248,5 +248,23 @@ function clearSuggestions() {
 }
 </script>
 
+<script>
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                document.getElementById("latitude").value = position.coords.latitude;
+                document.getElementById("longitude").value = position.coords.longitude;
+            },
+            function(error) {
+                console.log("Location error:", error);
+            }
+        );
+    } else {
+        console.log("Geolocation not supported");
+    }
+}
+</script>
+
 </body>
 </html>

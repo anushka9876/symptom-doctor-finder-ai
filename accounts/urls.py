@@ -7,8 +7,12 @@ app_name = 'accounts'   # namespace: use accounts:login in templates
 urlpatterns = [
     #path('login/',auth_views.LoginView.as_view(template_name='accounts/login.html'),name='login'),
     path('login/', views.login_view, name='login'),
-    
+
     path('logout/',auth_views.LogoutView.as_view(),name='logout'),
 
     path('register/', views.register_view, name='register'),
+
+    path('get-location/', views.get_location, name='get_location'),
+    
+    path('save-location/', views.save_location, name='save_location'),
 ]

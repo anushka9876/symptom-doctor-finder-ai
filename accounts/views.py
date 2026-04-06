@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login,authenticate
 from .forms import RegisterForm
+import json
+from django.http import JsonResponse
 
 def register_view(request):
     # GET request → show empty form
@@ -12,8 +14,8 @@ def register_view(request):
             user = form.save()  # saves User to database
 
             # Log user in immediately after registering
-            login(request, user)
-            return redirect('symptoms:home')
+            #login(request, user)
+            return redirect('accounts:login')
     else:
         form = RegisterForm() 
 
@@ -38,9 +40,22 @@ def login_view(request):
                 user.longitude = lng
                 user.save()
 
-            return redirect('symptoms:home')
+            return redirect('accounts:get_location')
         else:
             return render(request, 'accounts/login.html', {
                 'error': 'Invalid username or password'
             })
     return render(request, 'accounts/login.html')
+
+def get_location(request):
+    return render(request, 'accounts/get_location.html')
+
+def save_location(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+
+        request.user.latitude = data.get('latitude')
+        request.user.longitude = data.get('longitude')
+        request.user.save()
+
+        return JsonResponse({"status": "ok"})

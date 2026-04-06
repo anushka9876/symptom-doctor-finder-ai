@@ -41,5 +41,9 @@ def check_symptoms(request):
         selected = request.POST.getlist('selected_symptoms')
         text = request.POST.get('symptoms_text', '')
         all_inputs = text + " " + " ".join(selected)
+        latitude = request.POST.get("latitude")
+        longitude = request.POST.get("longitude")
+
+        print(latitude, longitude)
         return HttpResponse(f"You entered: {all_inputs}")
     return render(request, 'symptoms/symptom_form.html')

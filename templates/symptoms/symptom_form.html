@@ -34,6 +34,8 @@
 <div id="selected-symptoms"></div>
 
 <input type="hidden" name="symptoms" id="symptoms-input">
+<input type="hidden" name="latitude" id="latitude">
+<input type="hidden" name="longitude" id="longitude">
 
     <button type="submit">Check Symptoms</button>
   </form>
@@ -41,3 +43,10 @@
   <div id="results"></div>
 </div>
 {% endblock %}
+{% if user.is_authenticated %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    getLocation();
+});
+</script>
+{% endif %}
