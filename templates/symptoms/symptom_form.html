@@ -2,51 +2,59 @@
 {% block title %}Check Symptoms{% endblock %}
 
 {% block content %}
-<div class="card">
-  <h2>Describe your symptoms</h2>
+<div style="max-width:580px; margin:60px auto; padding:0 20px;">
 
-  <div class="search-box">
-    <input
-      type="text"
-      name="q"
-      placeholder="Type symptom e.g. fever"
-      hx-get="{% url 'symptoms:search' %}"
-      hx-trigger="keyup delay:400ms"
-      hx-target="#suggestions"
-    >
+  <h2 style="font-size:26px; font-weight:600; margin:0 0 4px;">
+    How are you feeling?
+  </h2>
+  <p style="color:#6b7280; font-size:14px; margin:0 0 28px;">
+    Search your symptoms below, then describe them.
+  </p>
+
+  <!-- LIVE SEARCH — HTMX stays exactly as you built it -->
+  <div style="position:relative; margin-bottom:16px;">
+    <label style="font-size:13px; font-weight:500; display:block; margin-bottom:6px;">
+      Search symptoms
+    </label>
+    <input type="text" name="q" autocomplete="off"
+           placeholder="e.g. fever, headache, nausea..."
+           hx-get="{% url 'symptoms:search' %}"
+           hx-trigger="keyup changed delay:400ms"
+           hx-target="#suggestions"
+           style="width:100%; padding:12px 16px; font-size:14px;
+                  border:1.5px solid #e5e7eb; border-radius:10px;"/>
     <div id="suggestions"></div>
   </div>
 
-  <form
-    method="post"
-    hx-post="{% url 'symptoms:check' %}"
-    hx-target="#results"
-  >
+  <!-- MAIN FORM — plain POST, no hx-post -->
+  <form method="POST" action="{% url 'symptoms:check' %}">
     {% csrf_token %}
-    <textarea name="symptoms_text" rows="4"
-      placeholder="Describe your symptoms..."></textarea>
-    <h3>Selected Symptoms</h3>
-
-<p id="empty-text" style="color:#888; font-size:14px;">
-  No symptoms selected
-</p>
-
-<div id="selected-symptoms"></div>
-
-<input type="hidden" name="symptoms" id="symptoms-input">
-<input type="hidden" name="latitude" id="latitude">
-<input type="hidden" name="longitude" id="longitude">
-
-    <button type="submit">Check Symptoms</button>
+    <label style="font-size:13px; font-weight:500; display:block; margin-bottom:6px;">
+      Describe your symptoms
+    </label>
+    <textarea name="symptoms_text" id="symptoms-text" rows="5"
+              placeholder="e.g. High fever since yesterday, body aches, no appetite..."
+              style="width:100%; padding:12px 16px; font-size:14px;
+                     border:1.5px solid #e5e7eb; border-radius:10px;
+                     resize:vertical; font-family:inherit;"
+    ></textarea>
+    <button type="submit"
+            style="width:100%; margin-top:16px; padding:14px;
+                   background:#2563EB; color:#fff; border:none;
+                   border-radius:10px; font-size:15px;
+                   font-weight:500; cursor:pointer;">
+      Check Symptoms →
+    </button>
   </form>
 
-  <div id="results"></div>
 </div>
-{% endblock %}
-{% if user.is_authenticated %}
+
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    getLocation();
-});
+function addSymptom(name) {
+  const ta = document.getElementById('symptoms-text');
+  ta.value = ta.value ? ta.value + ', ' + name : name;
+  document.getElementById('suggestions').innerHTML = '';
+  document.querySelector('input[name="q"]').value = '';
+}
 </script>
-{% endif %}
+{% endblock %}

@@ -30,32 +30,11 @@ def login_view(request):
 
         if user:
             login(request, user)
-
-            # save location
-            lat = request.POST.get('latitude')
-            lng = request.POST.get('longitude')
-
-            if lat and lng:
-                user.latitude = lat
-                user.longitude = lng
-                user.save()
-
-            return redirect('accounts:get_location')
+            # Redirect straight to the Symptom Form (assuming its name is 'symptoms:home')
+            return redirect('symptoms:home') 
         else:
             return render(request, 'accounts/login.html', {
                 'error': 'Invalid username or password'
             })
+            
     return render(request, 'accounts/login.html')
-
-def get_location(request):
-    return render(request, 'accounts/get_location.html')
-
-def save_location(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-
-        request.user.latitude = data.get('latitude')
-        request.user.longitude = data.get('longitude')
-        request.user.save()
-
-        return JsonResponse({"status": "ok"})

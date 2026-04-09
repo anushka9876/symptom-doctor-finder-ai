@@ -169,7 +169,7 @@
 <body>
 
 <nav class="navbar">
-  <a href="{% url 'symptoms:home' %}" class="logo">MediCheck 🩺</a>
+  <a href="{% url 'symptoms:form' %}" class="logo">MediCheck 🩺</a>
 
   <div class="nav-right">
     {% if user.is_authenticated %}
@@ -245,24 +245,6 @@ function updateHiddenInput() {
 function clearSuggestions() {
     const el = document.getElementById("suggestions");
     if (el) el.innerHTML = "";
-}
-</script>
-
-<script>
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                document.getElementById("latitude").value = position.coords.latitude;
-                document.getElementById("longitude").value = position.coords.longitude;
-            },
-            function(error) {
-                console.log("Location error:", error);
-            }
-        );
-    } else {
-        console.log("Geolocation not supported");
-    }
 }
 </script>
 

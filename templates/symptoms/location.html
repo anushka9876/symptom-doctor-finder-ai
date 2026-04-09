@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Find Location{% endblock %}
+
+{% block content %}
+<div style="max-width:480px; margin:60px auto; padding:0 20px; text-align:center;">
+
+  <p style="font-size:12px; color:#9ca3af; letter-spacing:.06em; margin:0 0 10px;">STEP 2 OF 3</p>
+  <h2 style="font-size:24px; font-weight:600; margin:0 0 8px;">Who needs the doctor?</h2>
+  <p style="color:#6b7280; font-size:14px; margin:0 0 36px;">
+    We'll use this to find the nearest available doctors.
+  </p>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:28px;">
+
+    <div id="c-me" onclick="pick('me')"
+         style="border:2px solid #e5e7eb; border-radius:14px;
+                padding:28px 16px; cursor:pointer; transition:.2s;">
+      <div style="font-size:34px; margin-bottom:10px;">📍</div>
+      <div style="font-weight:600; font-size:15px; margin-bottom:4px;">For Myself</div>
+      <div style="font-size:12px; color:#9ca3af;">Use my current GPS location</div>
+    </div>
+
+    <div id="c-fr" onclick="pick('friend')"
+         style="border:2px solid #e5e7eb; border-radius:14px;
+                padding:28px 16px; cursor:pointer; transition:.2s;">
+      <div style="font-size:34px; margin-bottom:10px;">👥</div>
+      <div style="font-weight:600; font-size:15px; margin-bottom:4px;">For a Friend</div>
+      <div style="font-size:12px; color:#9ca3af;">Enter their location</div>
+    </div>
+
+  </div>
+
+  <div id="friend-box" style="display:none; text-align:left; margin-bottom:16px;">
+    <label style="font-size:13px; font-weight:500; display:block; margin-bottom:6px;">
+      Their city or area
+    </label>
+    <input id="friend-loc" type="text"
+           placeholder="e.g. Lajpat Nagar, Delhi"
+           style="width:100%; padding:12px 16px; font-size:14px;
+                  border:1.5px solid #e5e7eb; border-radius:10px;"/>
+  </div>
+
+  <div id="status" style="font-size:13px; color:#6b7280; min-height:22px; margin-bottom:14px;"></div>
+
+  <button id="go-btn" onclick="go()"
+          style="display:none; width:100%; padding:14px;
+                 background:#2563EB; color:#fff; border:none;
+                 border-radius:10px; font-size:15px; font-weight:500; cursor:pointer;">
+    Get My Results →
+  </button>
+
+  <a href="{% url 'symptoms:form' %}"
+     style="display:block; margin-top:14px; font-size:13px; color:#9ca3af;">
+    ← Back to symptoms
+  </a>
+
+</div>
+
+<form id="go-form" method="POST" action="{% url 'symptoms:run' %}" style="display:none;">
+  {% csrf_token %}
+  <input type="hidden" id="f-lat" name="lat">
+  <input type="hidden" id="f-lng" name="lng">
+</form>
+
+<script>
+let who = null;
+
+function pick(w) {
+  who = w;
+  document.getElementById('c-me').style.borderColor  = w === 'me'     ? '#2563EB' : '#e5e7eb';
+  document.getElementById('c-fr').style.borderColor  = w === 'friend' ? '#2563EB' : '#e5e7eb';
+  document.getElementById('friend-box').style.display = w === 'friend' ? 'block' : 'none';
+  document.getElementById('go-btn').style.display = 'block';
+  setStatus(w === 'me' ? '📍 Ready to detect your location' : 'Enter where your friend is');
+}
+
+function go() {
+  if (who === 'me') getGPS(); else geocode();
+}
+
+function getGPS() {
+  if (!navigator.geolocation) { setStatus('GPS not supported'); pick('friend'); return; }
+  setStatus('⏳ Waiting for permission...'); busy(true);
+  navigator.geolocation.getCurrentPosition(
+    p  => submit(p.coords.latitude, p.coords.longitude),
+    () => { setStatus('❌ Permission denied — enter manually'); pick('friend'); busy(false); },
+    { timeout: 10000 }
+  );
+}
+
+async function geocode() {
+  const q = document.getElementById('friend-loc').value.trim();
+  if (!q) { setStatus('⚠️ Please enter a city or area'); return; }
+  setStatus('⏳ Looking up location...'); busy(true);
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1`);
+    const d = await r.json();
+    if (!d.length) { setStatus('❌ Not found — try a different name'); busy(false); return; }
+    submit(parseFloat(d[0].lat), parseFloat(d[0].lon));
+  } catch { setStatus('❌ Network error — try again'); busy(false); }
+}
+
+function submit(lat, lng) {
+  document.getElementById('f-lat').value = lat;
+  document.getElementById('f-lng').value = lng;
+  setStatus('✅ Found! Loading your results...');
+  document.getElementById('go-form').submit();
+}
+
+function setStatus(m) { document.getElementById('status').textContent = m; }
+function busy(b) {
+  const b_ = document.getElementById('go-btn');
+  b_.disabled = b; b_.textContent = b ? 'Loading... ⏳' : 'Get My Results →';
+}
+</script>
+{% endblock %}

@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from django.shortcuts import redirect
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/',include('accounts.urls')),
-    path('doctors/',include('doctors.urls')),
-    path('',include('symptoms.urls')),
+    path('',        lambda request: redirect('symptoms:form')),  # ← add this
+    path('admin/',  admin.site.urls),
+    path('accounts/', include('accounts.urls', namespace='accounts')),
+    path('doctors/',  include('doctors.urls',  namespace='doctors')),
+    path('symptoms/', include('symptoms.urls', namespace='symptoms')),
 ]
