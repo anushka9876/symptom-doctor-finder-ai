@@ -35,6 +35,8 @@ class SymptomCheck(models.Model):
 
     predicted_disease = models.ForeignKey(Disease, on_delete=models.SET_NULL, null=True, blank=True)
 
+    raw_text = models.TextField(blank=True)
+
     confidence_score = models.FloatField(null=True, blank=True)
 
     is_emergency = models.BooleanField(default=False)

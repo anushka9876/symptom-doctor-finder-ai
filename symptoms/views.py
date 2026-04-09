@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 import math
 from doctors.models import Doctor
-from .models import Symptom, SymptomCheck
+from .models import Symptom, SymptomCheck,Disease
 
 
 # ─────────────────────────────────────────────────────────────
@@ -73,11 +73,12 @@ def run_check(request):
     confidence = 87
 
     # ── Save to DB ────────────────────────────────────────────
+    disease_obj, _ = Disease.objects.get_or_create(name=disease)
     SymptomCheck.objects.create(
-        user=request.user,
-        raw_text=text,
-        predicted_disease=disease,
-        confidence=confidence,
+       user=request.user,
+       raw_text=text,
+       predicted_disease=disease_obj,   
+       confidence_score=confidence,
     )
 
     # ── Nearby doctors ────────────────────────────────────────

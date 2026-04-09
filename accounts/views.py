@@ -31,7 +31,7 @@ def login_view(request):
         if user:
             login(request, user)
             # Redirect straight to the Symptom Form (assuming its name is 'symptoms:home')
-            return redirect('symptoms:home') 
+            return redirect('symptoms:form') 
         else:
             return render(request, 'accounts/login.html', {
                 'error': 'Invalid username or password'
