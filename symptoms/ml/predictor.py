@@ -17,7 +17,7 @@ def predict_disease(symptoms_list: list) -> list:
     probabilities = clf.predict_proba(X)[0]
     classes = clf.classes_
 
-    top3_idx = __import__('numpy').argsort(probabilities)[::-1][:3]
+    top3_idx = np.argsort(probabilities)[::-1][:3]
 
     results = []
     for idx in top3_idx:
