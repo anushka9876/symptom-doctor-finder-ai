@@ -7,7 +7,10 @@ django.setup()
 
 from symptoms.models import Disease, Symptom
 
-df = pd.read_csv('symptoms/ml/dataset.csv')
+BASE_DIR = os.path.dirname(__file__)
+csv_path = os.path.join(BASE_DIR, 'dataset.csv')
+
+df = pd.read_csv(csv_path)
 
 # Get all unique diseases
 diseases = df['Disease'].unique()
