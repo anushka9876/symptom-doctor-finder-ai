@@ -11,24 +11,39 @@
     Search your symptoms below, then describe them.
   </p>
 
-  <!-- LIVE SEARCH — HTMX stays exactly as you built it -->
-  <div style="position:relative; margin-bottom:16px;">
+  <!-- ① LIVE SEARCH -->
+  <div style="position:relative; margin-bottom:8px;">
     <label style="font-size:13px; font-weight:500; display:block; margin-bottom:6px;">
       Search symptoms
     </label>
-    <input type="text" name="q" autocomplete="off"
+    <input type="text" id="symptom-search" name="q" autocomplete="off"
            placeholder="e.g. fever, headache, nausea..."
            hx-get="{% url 'symptoms:search' %}"
-           hx-trigger="keyup changed delay:400ms"
+           hx-trigger="keyup changed delay:300ms"
            hx-target="#suggestions"
            style="width:100%; padding:12px 16px; font-size:14px;
-                  border:1.5px solid #e5e7eb; border-radius:10px;"/>
-    <div id="suggestions"></div>
+                  border:1.5px solid #e5e7eb; border-radius:10px;
+                  box-sizing:border-box;"/>
+    <!-- dropdown -->
+    <div id="suggestions"
+         style="display:none; position:absolute; top:100%; left:0; right:0; z-index:100;
+                background:#fff; border:1.5px solid #e5e7eb; border-top:none;
+                border-radius:0 0 10px 10px; max-height:220px; overflow-y:auto;">
+    </div>
   </div>
 
-  <!-- MAIN FORM — plain POST, no hx-post -->
-  <form method="POST" action="{% url 'symptoms:check' %}">
+  <!-- ② CAPSULES — selected symptoms appear here -->
+  <div id="capsules"
+       style="display:flex; flex-wrap:wrap; gap:8px; min-height:10px; margin-bottom:16px;">
+  </div>
+
+  <!-- ③ MAIN FORM -->
+  <form method="POST" action="{% url 'symptoms:check' %}" id="symptom-form">
     {% csrf_token %}
+
+    <!-- carries selected capsule symptoms to Django -->
+    <input type="hidden" name="selected_symptoms" id="selected-symptoms-input">
+
     <label style="font-size:13px; font-weight:500; display:block; margin-bottom:6px;">
       Describe your symptoms
     </label>
@@ -36,8 +51,9 @@
               placeholder="e.g. High fever since yesterday, body aches, no appetite..."
               style="width:100%; padding:12px 16px; font-size:14px;
                      border:1.5px solid #e5e7eb; border-radius:10px;
-                     resize:vertical; font-family:inherit;"
+                     resize:vertical; font-family:inherit; box-sizing:border-box;"
     ></textarea>
+
     <button type="submit"
             style="width:100%; margin-top:16px; padding:14px;
                    background:#2563EB; color:#fff; border:none;
@@ -50,11 +66,60 @@
 </div>
 
 <script>
+const selectedSymptoms = new Set();
+
+// Called from symptom_suggestions.html partial on click
 function addSymptom(name) {
-  const ta = document.getElementById('symptoms-text');
-  ta.value = ta.value ? ta.value + ', ' + name : name;
+  if (selectedSymptoms.has(name)) return;
+  selectedSymptoms.add(name);
+  renderCapsules();
+  // clear search
+  document.getElementById('symptom-search').value = '';
+  document.getElementById('suggestions').style.display = 'none';
   document.getElementById('suggestions').innerHTML = '';
-  document.querySelector('input[name="q"]').value = '';
 }
+
+function removeSymptom(name) {
+  selectedSymptoms.delete(name);
+  renderCapsules();
+}
+
+function renderCapsules() {
+  const container = document.getElementById('capsules');
+  container.innerHTML = '';
+  selectedSymptoms.forEach(name => {
+    const cap = document.createElement('div');
+    cap.style.cssText = `
+      display:inline-flex; align-items:center; gap:6px;
+      background:#eff6ff; color:#1d4ed8;
+      border:1px solid #bfdbfe; border-radius:99px;
+      padding:5px 12px; font-size:13px; font-weight:500;
+    `;
+    cap.innerHTML = `
+      ${name}
+      <span onclick="removeSymptom('${name}')"
+            style="cursor:pointer; font-size:16px; line-height:1;
+                   color:#93c5fd; font-weight:700;">&times;</span>
+    `;
+    container.appendChild(cap);
+  });
+  // sync hidden input
+  document.getElementById('selected-symptoms-input').value = [...selectedSymptoms].join(',');
+}
+
+// show dropdown after HTMX swaps in results
+document.addEventListener('htmx:afterSwap', function(e) {
+  if (e.target.id === 'suggestions') {
+    const hasContent = e.target.innerHTML.trim() !== '';
+    e.target.style.display = hasContent ? 'block' : 'none';
+  }
+});
+
+// hide dropdown when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#symptom-search') && !e.target.closest('#suggestions')) {
+    document.getElementById('suggestions').style.display = 'none';
+  }
+});
 </script>
 {% endblock %}

@@ -2,7 +2,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 import math
 from doctors.models import Doctor
-from .models import Symptom, SymptomCheck,Disease
+from .models import Symptom, SymptomCheck, Disease
+
+from symptoms.ml.spacy_extractor import extract_symptoms
+from symptoms.ml.predictor import predict_disease
+from symptoms.ml.emergency import check_emergency
 
 
 # ─────────────────────────────────────────────────────────────
@@ -31,10 +35,21 @@ def symptom_form(request):
 @login_required
 def check_symptoms(request):
     if request.method == 'POST':
-        text = request.POST.get('symptoms_text', '').strip()
-        if text:
-            request.session['symptoms_text'] = text
+        text     = request.POST.get('symptoms_text', '').strip()
+        selected = request.POST.get('selected_symptoms', '').strip()
+
+        # combine capsule symptoms + free text
+        if selected and text:
+            combined = selected.replace(',', ', ') + '. ' + text
+        elif selected:
+            combined = selected.replace(',', ', ')
+        else:
+            combined = text
+
+        if combined:
+            request.session['symptoms_text'] = combined
             return redirect('symptoms:location')
+
     return redirect('symptoms:form')
 
 
@@ -44,7 +59,7 @@ def check_symptoms(request):
 @login_required
 def location_page(request):
     if 'symptoms_text' not in request.session:
-        return redirect('symptoms:form')   # guard: can't skip step 1
+        return redirect('symptoms:form')
     return render(request, 'symptoms/location.html')
 
 
@@ -66,22 +81,27 @@ def run_check(request):
     if not text:
         return redirect('symptoms:form')
 
-    # ── NLP goes here (Week 3) ────────────────────────────────
-    # disease, confidence = predict_disease(text)
-    # Placeholder until Week 3:
-    disease    = "Viral Fever"
-    confidence = 87
+    # 1. Extract symptoms from free text using spaCy
+    symptoms_found = extract_symptoms(text)
 
-    # ── Save to DB ────────────────────────────────────────────
-    disease_obj, _ = Disease.objects.get_or_create(name=disease)
+    # 2. Get top 3 disease predictions
+    top3 = predict_disease(symptoms_found)
+    top_disease    = top3[0]['disease']
+    top_confidence = top3[0]['confidence']
+
+    # 3. Check for emergency symptoms
+    is_emergency, emergency_msg = check_emergency(symptoms_found)
+
+    # 4. Save to DB
+    disease_obj, _ = Disease.objects.get_or_create(name=top_disease)
     SymptomCheck.objects.create(
-       user=request.user,
-       raw_text=text,
-       predicted_disease=disease_obj,   
-       confidence_score=confidence,
+        user=request.user,
+        raw_text=text,
+        predicted_disease=disease_obj,
+        confidence_score=top_confidence,
     )
 
-    # ── Nearby doctors ────────────────────────────────────────
+    # 5. Nearby doctors
     nearby = []
     for doc in Doctor.objects.all():
         dist = haversine(lat, lng, float(doc.latitude), float(doc.longitude))
@@ -96,8 +116,14 @@ def run_check(request):
         })
     nearby.sort(key=lambda x: x['distance_km'])
 
-    # ── Stash in session → redirect to results ────────────────
-    request.session['results']        = {'disease': disease, 'confidence': confidence, 'text': text}
+    # 6. Save to session → redirect to results
+    request.session['results'] = {
+        'top3':          top3,
+        'text':          text,
+        'symptoms':      symptoms_found,
+        'is_emergency':  is_emergency,
+        'emergency_msg': emergency_msg,
+    }
     request.session['nearby_doctors'] = nearby[:20]
     request.session['user_lat']       = lat
     request.session['user_lng']       = lng
@@ -112,11 +138,11 @@ def run_check(request):
 def results_page(request):
     results = request.session.pop('results', None)
     if not results:
-        return redirect('symptoms:form')   # guard: can't skip step 2
+        return redirect('symptoms:form')
 
-    nearby  = request.session.pop('nearby_doctors', [])
-    lat     = request.session.pop('user_lat', 0)
-    lng     = request.session.pop('user_lng', 0)
+    nearby = request.session.pop('nearby_doctors', [])
+    lat    = request.session.pop('user_lat', 0)
+    lng    = request.session.pop('user_lng', 0)
 
     return render(request, 'symptoms/results.html', {
         'results':        results,
