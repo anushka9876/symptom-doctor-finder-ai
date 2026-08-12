@@ -1,23 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Your Results{% endblock %}
-
 {% block content %}
 
-<!-- EMERGENCY ALERT — shown only if is_emergency is True -->
 {% if results.is_emergency %}
-<div style="background:#fef2f2; border:2px solid #fca5a5;
-            border-radius:12px; padding:18px 20px;
-            margin:20px auto; max-width:900px; color:#991b1b;">
+<div style="background:#fef2f2; border:2px solid #fca5a5; border-radius:12px;
+            padding:18px 20px; margin:20px auto; max-width:900px; color:#991b1b;">
   <div style="font-weight:700; font-size:16px; margin-bottom:4px;">🚨 Emergency Alert</div>
   <div style="font-size:14px;">{{ results.emergency_msg }}</div>
 </div>
 {% endif %}
 
-<!-- TOP BAR -->
 <div style="max-width:900px; margin:0 auto; padding:30px 20px 0;">
+
   <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
     <div>
-      <div style="font-size:12px; color:#9ca3af; letter-spacing:.06em; margin-bottom:4px;">RESULTS FOR</div>
+      <div style="font-size:12px; color:#9ca3af; margin-bottom:4px;">RESULTS FOR</div>
       <div style="font-size:14px; color:#374151;">{{ results.text|truncatechars:60 }}</div>
     </div>
     <a href="{% url 'symptoms:form' %}"
@@ -27,7 +24,6 @@
     </a>
   </div>
 
-  <!-- TOP 3 DISEASES -->
   <div style="font-size:12px; color:#9ca3af; margin-bottom:12px;">POSSIBLE CONDITIONS</div>
 
   {% for pred in results.top3 %}
@@ -37,66 +33,48 @@
                    font-size:{% if forloop.first %}17px{% else %}14px{% endif %};">
         {{ pred.disease }}
       </span>
-      <span style="font-size:13px; color:#2563EB; font-weight:500;">
-        {{ pred.confidence }}%
-      </span>
+      <span style="font-size:13px; color:#2563EB; font-weight:500;">{{ pred.confidence }}%</span>
     </div>
-    <!-- Confidence bar -->
     <div style="background:#e5e7eb; border-radius:99px; height:6px;">
-      <div style="background:#2563EB; height:6px; border-radius:99px;
-                  width:{{ pred.confidence }}%;"></div>
+      <div style="background:#2563EB; height:6px; border-radius:99px; width:{{ pred.confidence }}%;"></div>
     </div>
   </div>
   {% endfor %}
 
-  <!-- Symptoms detected -->
   {% if results.symptoms %}
-  <div style="margin-top:16px; font-size:12px; color:#6b7280;">
+  <div style="margin-top:12px; font-size:12px; color:#6b7280;">
     Symptoms detected:
     {% for s in results.symptoms %}
-      <span style="background:#f3f4f6; padding:3px 10px;
-                   border-radius:99px; margin:2px; display:inline-block;">
-        {{ s }}
-      </span>
+    <span style="background:#f3f4f6; padding:3px 10px; border-radius:99px;
+                 margin:2px; display:inline-block;">{{ s }}</span>
     {% endfor %}
   </div>
   {% endif %}
 
-  <p style="font-size:12px; color:#9ca3af; margin-top:12px;">
-    This is not a medical diagnosis. Always consult a qualified doctor.
+  <p style="font-size:12px; color:#9ca3af; margin-top:10px;">
+    Not a diagnosis — please consult a qualified doctor.
   </p>
 
 </div>
 
-<!-- MAP + DOCTOR LIST -->
 {% if nearby_doctors %}
-<div style="max-width:900px; margin:0 auto; padding:20px 20px 40px;
-            display:flex; gap:16px; height:520px;">
+<div style="max-width:900px; margin:20px auto; padding:0 20px 40px;">
 
-  <!-- LEFT: scrollable doctor cards -->
-  <div style="width:300px; overflow-y:auto; flex-shrink:0;">
-    <div style="font-size:13px; font-weight:600; margin-bottom:12px;">
-      {{ nearby_doctors|length }} doctors nearby
-    </div>
-    {% for doc in nearby_doctors %}
-    <div id="card-{{ doc.id }}"
-         onclick="flyTo({{ doc.latitude }}, {{ doc.longitude }}, {{ doc.id }})"
-         style="border:1.5px solid #e5e7eb; border-radius:10px;
-                padding:12px 14px; margin-bottom:8px;
-                cursor:pointer; transition:.2s;">
-      <div style="font-weight:600; font-size:14px;">{{ doc.name }}</div>
-      <div style="font-size:12px; color:#6b7280; margin-top:2px;">{{ doc.specialty }}</div>
-      <div style="display:flex; justify-content:space-between; margin-top:8px;">
-        <span style="font-size:12px; color:#2563EB; font-weight:500;">{{ doc.distance_km }} km</span>
-        <span style="font-size:12px; color:#9ca3af;">₹{{ doc.fee }}</span>
-      </div>
-    </div>
-    {% endfor %}
+  <div style="font-size:14px; font-weight:600; margin-bottom:10px;">Nearby Hospitals</div>
+
+  <div id="loading" style="display:none; font-size:13px; color:#9ca3af; margin-bottom:8px;">
+    Loading...
   </div>
 
-  <!-- RIGHT: Leaflet map -->
-  <div id="map" style="flex:1; border-radius:14px; overflow:hidden;"></div>
+  <div style="display:flex; gap:16px; height:500px;">
 
+    <div id="doctor-list" style="width:300px; overflow-y:auto; flex-shrink:0;">
+      {% include 'partials/doctor_cards.html' with doctors=nearby_doctors %}
+    </div>
+
+    <div id="map" style="flex:1; border-radius:14px; overflow:hidden;"></div>
+
+  </div>
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -111,7 +89,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// Blue dot — user location
 L.marker([userLat, userLng], {
   icon: L.divIcon({
     html: '<div style="width:14px;height:14px;background:#2563EB;border:3px solid #fff;border-radius:50%;box-shadow:0 0 6px rgba(0,0,0,.3)"></div>',
@@ -119,25 +96,27 @@ L.marker([userLat, userLng], {
   })
 }).addTo(map).bindPopup('📍 Your location');
 
-// Doctor pins
 const pins = {};
 docs.forEach(d => {
   pins[d.id] = L.marker([d.latitude, d.longitude])
     .addTo(map)
-    .bindPopup(`<b>${d.name}</b><br>${d.specialty}<br><span style="color:#2563EB">${d.distance_km} km away</span><br>₹${d.fee}`);
+    .bindPopup(`<b>${d.name}</b><br>${d.specialty}<br><span style="color:#2563EB">${d.distance_km} km</span><br>${d.fee}`);
   pins[d.id].on('click', () => highlight(d.id));
 });
 
 function flyTo(lat, lng, id) {
   map.flyTo([lat, lng], 15, { duration: 1 });
-  pins[id].openPopup();
+  if (pins[id]) pins[id].openPopup();
   highlight(id);
 }
 
 function highlight(id) {
   document.querySelectorAll('[id^="card-"]').forEach(c => c.style.borderColor = '#e5e7eb');
   const card = document.getElementById(`card-${id}`);
-  if (card) { card.style.borderColor = '#2563EB'; card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+  if (card) {
+    card.style.borderColor = '#2563EB';
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 </script>
 {% endif %}

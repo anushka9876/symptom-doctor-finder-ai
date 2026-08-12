@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Appointment Booked{% endblock %}
+{% block content %}
+<div style="max-width:500px; margin:80px auto; padding:0 20px; text-align:center;">
+
+  <div style="font-size:56px; margin-bottom:16px;">✅</div>
+
+  <h2 style="font-size:24px; font-weight:600; margin:0 0 8px;">
+    Appointment Requested
+  </h2>
+  <p style="color:#6b7280; font-size:14px; margin:0 0 32px; line-height:1.6;">
+    Your appointment request has been saved. Please contact the hospital directly to confirm your slot.
+  </p>
+
+  <a href="{% url 'symptoms:form' %}"
+     style="display:inline-block; padding:12px 28px; background:#2563EB;
+            color:#fff; border-radius:10px; text-decoration:none;
+            font-size:14px; font-weight:500;">
+    Check Another Symptom
+  </a>
+
+</div>
+{% endblock %}

@@ -17,11 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from django.shortcuts import redirect
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
-    path('',        lambda request: redirect('symptoms:form')),  # ← add this
+    path('',        lambda request: redirect('symptoms:form')),  
     path('admin/',  admin.site.urls),
     path('accounts/', include('accounts.urls', namespace='accounts')),
     path('doctors/',  include('doctors.urls',  namespace='doctors')),
     path('symptoms/', include('symptoms.urls', namespace='symptoms')),
+
+
+    # API routes
+    path('api/auth/token/', obtain_auth_token),
+    path('api/doctors/',   include('doctors.api_urls')),
+    path('api/symptoms/',  include('symptoms.api_urls')),
 ]
