@@ -11,7 +11,6 @@
       margin: 0;
     }
 
-    /* NAVBAR */
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -66,12 +65,10 @@
       color: #0D9488;
     }
 
-    /* CONTAINER */
     .container {
       padding: 40px;
     }
 
-    /* CARD */
     .card {
       max-width: 600px;
       margin: auto;
@@ -81,7 +78,6 @@
       box-shadow: 0 8px 25px rgba(0,0,0,0.1);
     }
 
-    /* INPUTS */
     input, textarea {
       width: 100%;
       padding: 12px;
@@ -95,7 +91,6 @@
       outline: none;
     }
 
-    /* BUTTON */
     button {
       width: 100%;
       padding: 12px;
@@ -112,7 +107,6 @@
       background: #0f766e;
     }
 
-    /* SEARCH DROPDOWN */
     .search-box {
       position: relative;
     }
@@ -139,7 +133,6 @@
       color: #0D9488;
     }
 
-    /* TAGS */
     #selected-symptoms {
       margin-top: 10px;
     }
@@ -160,7 +153,6 @@
       background: #0D9488;
       color: white;
     }
-
   </style>
 
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -173,8 +165,11 @@
 
   <div class="nav-right">
     {% if user.is_authenticated %}
+      <a href="{% url 'accounts:dashboard' %}"
+         style="text-decoration:none; color:#0D9488; font-size:14px; font-weight:500;">
+        Dashboard
+      </a>
       <span class="user-badge">👋 {{ user.username }}</span>
-
       <form method="post" action="{% url 'accounts:logout' %}">
         {% csrf_token %}
         <button class="logout-btn">Logout</button>
