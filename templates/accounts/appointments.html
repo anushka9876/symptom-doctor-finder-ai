@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}My Appointments{% endblock %}
+{% block content %}
+<div style="max-width:700px; margin:40px auto; padding:0 20px;">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+    <h2 style="font-size:22px; font-weight:600; margin:0;">My Appointments</h2>
+    <a href="{% url 'symptoms:form' %}"
+       style="padding:9px 18px; background:#2563EB; color:#fff;
+              border-radius:8px; text-decoration:none; font-size:13px; font-weight:500;">
+      + New Check
+    </a>
+  </div>
+
+  {% for booking in bookings %}
+  <div style="background:#fff; border:1.5px solid #e5e7eb; border-radius:12px;
+              padding:16px 20px; margin-bottom:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:start;">
+      <div>
+        <div style="font-weight:600; font-size:15px;">{{ booking.hospital_name }}</div>
+        <div style="font-size:13px; color:#6b7280; margin-top:3px;">{{ booking.specialty }}</div>
+        {% if booking.address and booking.address != "See on map" %}
+        <div style="font-size:12px; color:#9ca3af; margin-top:2px;">{{ booking.address }}</div>
+        {% endif %}
+      </div>
+      <div style="text-align:right; flex-shrink:0; margin-left:16px;">
+        <span style="background:#eff6ff; color:#2563EB; font-size:11px;
+                     font-weight:500; padding:3px 10px; border-radius:99px;">
+          Pending
+        </span>
+        <div style="font-size:11px; color:#9ca3af; margin-top:6px;">
+          {{ booking.booked_at|date:"M d, Y" }}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div style="text-align:center; padding:60px 0; color:#9ca3af;">
+    <div style="font-size:40px; margin-bottom:12px;">🏥</div>
+    <div style="font-size:15px; font-weight:500; margin-bottom:6px;">No appointments yet</div>
+    <a href="{% url 'symptoms:form' %}" style="color:#2563EB; font-size:13px;">
+      Check your symptoms to find a doctor
+    </a>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

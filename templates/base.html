@@ -169,6 +169,10 @@
          style="text-decoration:none; color:#0D9488; font-size:14px; font-weight:500;">
         Dashboard
       </a>
+      <a href="{% url 'accounts:appointments' %}"
+   style="text-decoration:none; color:#0D9488; font-size:14px; font-weight:500;">
+  Appointments
+</a>
       <span class="user-badge">👋 {{ user.username }}</span>
       <form method="post" action="{% url 'accounts:logout' %}">
         {% csrf_token %}

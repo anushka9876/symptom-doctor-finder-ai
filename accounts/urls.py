@@ -14,6 +14,8 @@ urlpatterns = [
 
     path('dashboard/', views.dashboard,   name='dashboard'),
 
+    path('appointments/', views.appointments, name='appointments'),
+
     #path('get-location/', views.get_location, name='get_location'),
     
     #path('save-location/', views.save_location, name='save_location'),

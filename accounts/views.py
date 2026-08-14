@@ -10,6 +10,7 @@ from datetime import timedelta
 from symptoms.models import SymptomCheck
 from doctors.models import HospitalAppointment
 
+
 def register_view(request):
     # GET request → show empty form
     # POST request → validate and save
@@ -107,3 +108,9 @@ def dashboard(request):
         'pie_data':        json.dumps(pie_data),
         'history':         history,
     })
+@login_required
+def appointments(request):
+    bookings = HospitalAppointment.objects.filter(
+        user=request.user
+    ).order_by('-booked_at')
+    return render(request, 'accounts/appointments.html', {'bookings': bookings})
