@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import HospitalAppointment
 from .overpass import fetch_nearby_hospitals
+from symptoms.sms import send_appointment_sms
 
 
 @login_required
 def book_appointment(request):
     if request.method == 'POST':
-        HospitalAppointment.objects.create(
+        appt = HospitalAppointment.objects.create(
             user=request.user,
             hospital_name=request.POST.get('hospital_name', ''),
             hospital_osm=request.POST.get('hospital_id', ''),
@@ -15,6 +16,12 @@ def book_appointment(request):
             latitude=float(request.POST.get('latitude', 0)),
             longitude=float(request.POST.get('longitude', 0)),
             address=request.POST.get('address', ''),
+        )
+        # Send SMS if user has phone number
+        send_appointment_sms(
+            to_phone=request.user.phone,
+            hospital_name=appt.hospital_name,
+            specialty=appt.specialty,
         )
         return redirect('doctors:booking_success')
     return redirect('symptoms:form')
